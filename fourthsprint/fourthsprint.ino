@@ -86,38 +86,79 @@ void setup()
  */
 void loop() 
 {
-  /* Lectura de sensores*/
-  moistureFunction();
-  temperatureFunction();
- 
-  /* Impresion de valores en la terminal*/
-  printSensors();                                                         /* Impresion del valor de los sensores                        */
-
-  /* Subida de datos a ThingSpeak*/
-  ThingSpeak.writeField(myChannelNumber, 1, MoistureInside, apiKey);      /* Muestreo de humedad dentro de la composta en ThingSpeak    */
-  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
-  ThingSpeak.writeField(myChannelNumber, 2, TemperatureInside, apiKey);   /* Muestreo de temperatura dentro de la composta en ThingSpeak*/
-  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
-  ThingSpeak.writeField(myChannelNumber, 3, MoistureOutside, apiKey);     /* Muestreo de humedad fuera de la composta en ThingSpeak     */
-  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
-  ThingSpeak.writeField(myChannelNumber, 4, TemperatureOutside, apiKey);  /* Muestreo de temperatura fuera de la composta en ThingSpeak */
-  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
-  delayTime(SAMPLING);                                                    /* Tiempo de muestreo de los datos                            */
+  bool north = positionSensor();  /* Position del norte con el giroscopio               */
+  moistureFunction(north);        /* Lectura de sensores de humedad                     */
+  temperatureFunction(north);     /* Lectura de sensores de temperatura                 */
+  printSensors();                 /* Impresion del valor de los sensores en la terminal */
+  ThingSpeakUpload();             /* Subida de informacion a la nube de ThingSpeak      */
 }
 
-
-void moistureFunction(void)
+/********************************************************************************************/
+/********************************************************************************************/
+/********************************************************************************************/
+/*!
+  \brief      Funcion que utiliza el giroscopio para determinar si el norte esta fuera de su 
+              posicion y si esta fuera, se mandara un FALSE sino un TRUE, en caso de que este
+              en su posicion original o cercana dentro de sus 180 grados
+  \param[in]  void
+  \return     
+ */
+bool positionSensor(void)
 {
-  MoistureSensor1 = dht1.getHumidity();      
-  MoistureSensor2 = dht2.getHumidity();        
+  
 }
 
-void temperatureSensor(void)
+/********************************************************************************************/
+/********************************************************************************************/
+/********************************************************************************************/
+/*!
+  \brief      Funcion que lee los datos recolectados de los sensores de humedad, cada vez que
+              el norte cambia, los sensores se cambian de rol de interior y externo
+  \param[in]  north
+  \return     void
+ */
+void moistureFunction(bool north)
 {
-  sensors.requestTemperatures();
-  TemperatureSensor1 = sensors.getTempC(address_tempsensor1);
-  TemperatureSensor2 = sensors.getTempC(address_tempsensor2); 
+  MoistureSensor1 = dht1.getHumidity();   /* Lectura de sensor de humedad 1*/   
+  MoistureSensor2 = dht2.getHumidity();   /* Lectura de sensor de humedad 2*/
+  
+  if(north == true)                       /* Si el norte esta en su posicion original*/
+  {
+    MoistureInside  = MoistureSensor1;    /* El sensor de humedad interior es el sensor 1*/
+    MoistureOutside = MoistureSensor2;    /* El sensor de humedad exterior es el sensor 2*/
+  }
+  else                                    /* Si el norte cambia de posicion original*/
+  {
+    MoistureInside  = MoistureSensor2;    /* El sensor de humedad interior es el sensor 2*/
+    MoistureOutside = MoistureSensor1;    /* El sensor de humedad exterior es el sensor 1*/
+  }        
+}
 
+/********************************************************************************************/
+/********************************************************************************************/
+/********************************************************************************************/
+/*!
+  \brief      Funcion que lee los datos recolectados de los sensores de temperatura, cada vez
+              que el norte cambia, los sensores se cambian de rol de interior y externo
+  \param[in]  north
+  \return     void
+ */
+void temperatureSensor(bool north)
+{
+  sensors.requestTemperatures();                                /* Se realiza un request para leer el bus de sensores*/
+  TemperatureSensor1 = sensors.getTempC(address_tempsensor1);   /* Se lee el sensor de temperatura 1*/
+  TemperatureSensor2 = sensors.getTempC(address_tempsensor2);   /* Se lee el sensor de temperatura 2*/
+
+  if(north == true)                                             /* Si el norte esta en su posicion original*/
+  {
+    TemperatureInside   = TemperatureSensor1;                   /* El sensor de temperatura interior es el sensor 1*/
+    TemperatureOutside  = TemperatureSensor2;                   /* El sensor de temperatura exterior es el sensor 2*/
+  }
+  else                                                          /* Si el norte cambia de posicion original*/
+  {
+    TemperatureInside   = TemperatureSensor2;                   /* El sensor de temperatura interior es el sensor 2*/
+    TemperatureOutside  = TemperatureSensor1;                   /* El sensor de temperatura exterior es el sensor 1*/
+  }
 }
 
 /********************************************************************************************/
@@ -187,5 +228,27 @@ void delayTime(long interval)
   
   if((currentMillis - previousMillis) >= interval)  /* Mientras el valor actualizable sea mayor al intervalo  */
     previousMillis = currentMillis;                 /* El valor actualizable se guarda como valor previo      */
+}
+
+/********************************************************************************************/
+/********************************************************************************************/
+/********************************************************************************************/
+/*!
+  \brief      Funcion que sube los datos a la nube de ThingSpeak
+  \param[in]  void
+  \return     void
+ */
+void ThingSpeakUpload(void)
+{
+  /* Subida de datos a ThingSpeak*/
+  ThingSpeak.writeField(myChannelNumber, 1, MoistureInside, apiKey);      /* Muestreo de humedad dentro de la composta en ThingSpeak    */
+  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
+  ThingSpeak.writeField(myChannelNumber, 2, TemperatureInside, apiKey);   /* Muestreo de temperatura dentro de la composta en ThingSpeak*/
+  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
+  ThingSpeak.writeField(myChannelNumber, 3, MoistureOutside, apiKey);     /* Muestreo de humedad fuera de la composta en ThingSpeak     */
+  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
+  ThingSpeak.writeField(myChannelNumber, 4, TemperatureOutside, apiKey);  /* Muestreo de temperatura fuera de la composta en ThingSpeak */
+  delayTime(SEND_DATA);                                                   /* Tiempo de espera de subida del dato a ThingSpeak           */
+  delayTime(SAMPLING);                                                    /* Tiempo de muestreo de los datos                            */
 }
 
