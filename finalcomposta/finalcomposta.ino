@@ -27,6 +27,7 @@
 /* Muestreo*/
 unsigned int FlagSampling;                      /* Bandera de muestreo*/
 unsigned int CounterSamples = 0;                /* Contador de muestras para realizar el promedio*/
+#define   MAX_COUNT     1
 
 /* Constantes de la plataforma ThingSpeak*/
 const char * apiKey = "VJ3NDGMHL5LEM9M3";       /* Write API key de ThingSpeak    */
@@ -144,11 +145,11 @@ void loop()
     moistureFunction(north);            /* Lectura de sensores de humedad                     */
     temperatureFunction(north);         /* Lectura de sensores de temperatura                 */
     printSensors();                     /* Impresion del valor de los sensores en la terminal */
-    averageSensors();                   /* Realiza promedio de las 3 muestras realizadas*/
-    
-    if(CounterSamples >= 3)             /* En la tercera muestra se reinicia el contador*/
+    //averageSensors();                   /* Realiza promedio de las 3 muestras realizadas*/
+
+    if(CounterSamples >= MAX_COUNT)     /* En la tercera muestra se reinicia el contador*/
     {
-      CounterSamples = 0;               /* Las 3 muestras se mandan a la nube y se reinicia el contador*/
+      CounterSamples = 0;               /* Las muestras se mandan a la nube y se reinicia el contador*/
       ThingSpeakUpload();               /* Subida de informacion a la nube de ThingSpeak      */
     }   
   }
