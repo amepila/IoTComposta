@@ -18,7 +18,7 @@
 #include "Wire.h"                               /* Libreria para el I2C del acelerometro  */
 
 /* Defines del programa*/
-#define   SAMPLING      60000                  /* Valor de muestreo donde 1000 unidades son 1 segundo            */
+#define   SAMPLING      60000                   /* Valor de muestreo donde 1000 unidades son 1 segundo            */
 #define   SEND_DATA     30000                   /* 30 segundos para subir datos a ThingSpeak con el protocolo WiFi*/
 #define   ONE_WIRE_BUS  D3                      /* Pin dedicado al bus de los sensores de temperatura             */
 #define   INPUT_D4      2                       /* Entrada digital 1 para sensor de humedad 1                     */
@@ -31,8 +31,8 @@ unsigned int CounterSamples = 0;                /* Contador de muestras para rea
 
 /* Constantes de la plataforma ThingSpeak*/
 const char * apiKey = "VJ3NDGMHL5LEM9M3";       /* Write API key de ThingSpeak    */
-const char *ssid    = "Telcel-77B1";             /* SSID de la red a utilizar      */
-const char *pass    = "GF919AFAY1J";              /* Password de la red a utilizar  */
+const char *ssid    = "AndresWifi";             /* SSID de la red a utilizar      */
+const char *pass    = "amepila77";              /* Password de la red a utilizar  */
 const char* server  = "api.thingspeak.com";     /* Servidor de la ThingSpeak      */
 unsigned long myChannelNumber = 879714;         /* Numero de canal de ThingSpeak  */
 const int     FieldNumber1    = 1;              /* Numero de campo 1              */
